@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import path from "node:path"
 import test from "node:test"
-import { bridgeEnvironment, buildBridgeArgs, buildDaemonArgs, canListenForBind, createManagedShutdown, detectBackends, lanAddresses, resolveBackend, resolveLaunchPlan, startManagedOpenCode } from "../src/launcher.js"
+import { bridgeEnvironment, buildBridgeArgs, buildDaemonArgs, canListenForBind, createManagedShutdown, detectBackends, lanAddresses, resolveBackend, resolveLaunchPlan, resolveOpenCodeCommand, startManagedOpenCode } from "../src/launcher.js"
 
 test("detects executable agent files on PATH without running them", () => {
   const pathValue = ["/bin", "/tools"].join(path.delimiter)
@@ -18,6 +18,18 @@ test("detects OpenCode as a managed direct-HTTP backend", () => {
   const candidate = path.join("/tools", "opencode")
   assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => value === candidate, access: () => {} }), ["opencode"])
   assert.equal(resolveBackend([], ["opencode"]), "opencode")
+})
+
+test("detects mimocode as an OpenCode-compatible managed backend", () => {
+  const candidate = path.join("/tools", "mimo")
+  assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => value === candidate, access: () => {} }), ["opencode"])
+})
+
+test("resolves the managed OpenCode command to mimo when OpenCode is absent", () => {
+  const mimo = path.join("/tools", "mimo")
+  const options = { platform: "linux", exists: (value) => value === mimo, access: () => {} }
+  assert.equal(resolveOpenCodeCommand({ PATH: "/tools" }, options), mimo)
+  assert.equal(resolveOpenCodeCommand({ PATH: "/tools", HARNESS_REMOTE_OPENCODE_COMMAND: "/opt/custom" }, options), "/opt/custom")
 })
 
 test("delegates OpenCode startup to the managed host", async () => {

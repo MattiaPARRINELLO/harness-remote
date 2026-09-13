@@ -7,7 +7,7 @@ import { AcpAgentModelCatalog, HttpAgentModelCatalog } from "./agent-model-catal
 import { parseConfig, usage as bridgeUsage } from "./config.js"
 import { acpHarnessCapabilityContract, openCodeCapabilityContract } from "./harness-capability-contract.js"
 import { harnessProfile, resolveAcpLaunch } from "./harness-profiles.js"
-import { canListen, canListenForBind, harnessPortUnavailableMessage, resolveLaunchPlan } from "./launcher.js"
+import { canListen, canListenForBind, harnessPortUnavailableMessage, resolveLaunchPlan, resolveOpenCodeCommand } from "./launcher.js"
 import { loadMachineIdentity } from "./machine-registry.js"
 import { MachineDaemon, createMachineDaemonServer } from "./machine-daemon.js"
 import { ManagedOpenCodeHost } from "./opencode-host.js"
@@ -28,7 +28,7 @@ export function parseDaemonOptions(args, environment = process.env, detect = res
   const bridgeArgs = []
   const options = {
     openCode: true,
-    openCodeCommand: environment.HARNESS_REMOTE_OPENCODE_COMMAND ?? "opencode",
+    openCodeCommand: resolveOpenCodeCommand(environment),
     openCodeHost: environment.HARNESS_REMOTE_OPENCODE_HOST ?? "127.0.0.1",
     openCodePort: parsePort(environment.HARNESS_REMOTE_OPENCODE_PORT ?? "4096", "--opencode-port"),
     openCodeTimeout: Number(environment.HARNESS_REMOTE_OPENCODE_TIMEOUT ?? "15000")

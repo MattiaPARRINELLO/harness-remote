@@ -13,7 +13,7 @@ const BACKEND_EXECUTABLES = {
   pi: ["pi"],
   claude: ["claude"],
   codex: ["codex"],
-  opencode: ["opencode"]
+  opencode: ["opencode", "mimo"]
 }
 
 // This is product policy, not alphabetical order: prefer the broadest/most-tested ACP path first.
@@ -58,6 +58,18 @@ export function findExecutable(name, { pathValue = process.env.PATH ?? "", platf
     }
   }
   return null
+}
+
+// OpenCode and mimocode (a native OpenCode fork) expose the same HTTP server contract, so either
+// binary can back the managed OpenCode host. Prefer the upstream name, then the fork, then fall
+// back to the upstream name so a missing install still surfaces the familiar spawn error.
+export function resolveOpenCodeCommand(environment = process.env, options = {}) {
+  const pathValue = environment.PATH ?? ""
+  const find = (name) => findExecutable(name, { pathValue, ...options })
+  return environment.HARNESS_REMOTE_OPENCODE_COMMAND
+    ?? find("opencode")
+    ?? find("mimo")
+    ?? "opencode"
 }
 
 export function detectBackends(options = {}) {
@@ -346,7 +358,7 @@ async function main() {
 
   if (backend === "opencode") {
     process.stdout.write("\nStarting managed OpenCode host...\n")
-    const managed = await startManagedOpenCode({ host, port, username, password })
+    const managed = await startManagedOpenCode({ host, port, username, password, command: resolveOpenCodeCommand() })
     process.stdout.write(`OpenCode is ready on ${host}:${port}. Keep this process running while Harness Remote is connected.\n`)
 
     let shuttingDown = false
