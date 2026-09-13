@@ -103,6 +103,10 @@ export function acpHarnessCapabilityContract(profile) {
   }
 }
 
+export function mimocodeCapabilityContract() {
+  return openCodeCapabilityContract()
+}
+
 export function openCodeCapabilityContract() {
   return {
     version: 2,

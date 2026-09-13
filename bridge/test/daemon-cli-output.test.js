@@ -9,13 +9,13 @@ test("managed agent summary does not expose the internal OpenCode endpoint", () 
   assert.match(source, /managed \$\{host\.transport\.toUpperCase\(\)\}, \$\{host\.state\}/)
 })
 
-test("daemon registers managed OpenCode for first-use startup instead of boot startup", () => {
+test("daemon registers managed OpenCode/Mimocode for first-use startup instead of boot startup", () => {
   const registration = source.match(/daemon\.registerManagedHttpHost\(\{[\s\S]*?\n\s*\}\)/)
-  assert.ok(registration, "OpenCode managed host registration should remain explicit")
-  assert.match(registration[0], /id: "opencode"/)
+  assert.ok(registration, "Managed host registration should remain explicit")
+  assert.match(registration[0], /id: managedBackend/)
   assert.match(registration[0], /eager: false/)
 })
 
-test("managed OpenCode stderr is visibly attributed by the daemon", () => {
-  assert.match(source, /managedOpenCode\.on\("stderr", \(line\) => process\.stderr\.write\(`\[opencode\] \$\{line\}\\n`\)\)/)
+test("managed OpenCode/Mimocode stderr is visibly attributed by the daemon", () => {
+  assert.match(source, /managedOpenCode\.on\("stderr", \(line\) => process\.stderr\.write\(`\[?\$\{managedBackend\}?\] \$\{line\}\\n`\)\)/)
 })

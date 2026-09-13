@@ -26,7 +26,7 @@ export async function probeNativeSessionContinuation(
   target: NativeSessionSurfaceTarget,
   client: NativeSessionContinuationApi = nativeSessionClaimTransport
 ): Promise<NativeSessionContinuationResult> {
-  if (target.backend === "opencode") return { writable: true }
+  if (target.backend === "opencode" || target.backend === "mimocode") return { writable: true }
   if (!target.requiresExplicitClaim) return { writable: true }
 
   try {

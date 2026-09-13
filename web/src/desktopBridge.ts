@@ -85,11 +85,11 @@ export type DesktopProfileSource = {
  */
 export function toDesktopProfiles(profiles: readonly DesktopProfileSource[]): DesktopProfile[] {
   return profiles.flatMap((profile) => {
-    const normalized = normalizeServerConfig({ ...profile.config, backend: "opencode", agentId: undefined })
+    const normalized = normalizeServerConfig({ ...profile.config, backend: profile.config.backend === "mimocode" ? "mimocode" : "opencode", agentId: undefined })
     if (!normalized) return []
     return [{
       id: profile.id,
-      backend: "opencode",
+      backend: profile.config.backend || "opencode",
       host: normalized.host,
       port: normalized.port,
       username: normalized.username,

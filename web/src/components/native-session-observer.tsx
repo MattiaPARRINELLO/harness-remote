@@ -56,7 +56,7 @@ function targetForInitialRuntime(target: NativeSessionSurfaceTarget): NativeSess
   // actually used by the latest turn. Treat those list values as provisional: mount immediately
   // without them, then let native message/rollout metadata refine the already-visible controller.
   // OMP/PI branch metadata and Claude ACP config are already authoritative on their normal paths.
-  return target.backend === "opencode" || target.backend === "codex"
+  return target.backend === "opencode" || target.backend === "mimocode" || target.backend === "codex"
     ? { ...target, model: null }
     : target
 }

@@ -22,7 +22,7 @@ test("detects OpenCode as a managed direct-HTTP backend", () => {
 
 test("detects mimocode as an OpenCode-compatible managed backend", () => {
   const candidate = path.join("/tools", "mimo")
-  assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => value === candidate, access: () => {} }), ["opencode"])
+  assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => value === candidate, access: () => {} }), ["opencode", "mimocode"])
 })
 
 test("resolves the managed OpenCode command to mimo when OpenCode is absent", () => {

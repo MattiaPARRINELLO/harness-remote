@@ -78,7 +78,7 @@ export function routingHeaders(
   config: Pick<ServerConfig, "backend" | "agentId">,
   { preflight = true }: { preflight?: boolean } = {}
 ): Record<string, string> {
-  if (preflight && config.backend === "opencode" && !config.agentId?.trim()) return {}
+  if (preflight && (config.backend === "opencode" || config.backend === "mimocode") && !config.agentId?.trim()) return {}
   return { "X-Harness-Backend": config.backend }
 }
 

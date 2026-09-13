@@ -43,7 +43,7 @@ export function isProjectListing(value: unknown): boolean {
 
 export function machineCandidates(config: ServerConfig): ServerConfig[] {
   const current = { ...config }
-  if (config.backend !== "opencode" || config.port === DEFAULT_MACHINE_DAEMON_PORT) return [current]
+  if ((config.backend !== "opencode" && config.backend !== "mimocode") || config.port === DEFAULT_MACHINE_DAEMON_PORT) return [current]
   return [
     current,
     { ...config, port: DEFAULT_MACHINE_DAEMON_PORT, agentId: config.agentId?.trim() || "opencode" }
