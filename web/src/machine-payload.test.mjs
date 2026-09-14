@@ -36,6 +36,10 @@ assert.equal(candidates[1].agentId, 'opencode')
 assert.ok(candidates.every((candidate) => candidate.host === opencode.host))
 assert.equal(machineCandidates({ ...opencode, port: 4097 }).length, 1)
 assert.equal(machineCandidates({ ...opencode, backend: 'codex' }).length, 1)
+const mimocode = { backend: 'mimocode', host: '192.168.1.64', port: 4096, username: 'harness', password: 'secret' }
+const mimocodeCandidates = machineCandidates(mimocode)
+assert.equal(mimocodeCandidates.length, 2, 'Mimocode also probes the daemon endpoint')
+assert.equal(mimocodeCandidates[1].agentId, 'mimocode', 'daemon candidate must use the backend as agentId')
 assert.notEqual(machineCandidates(opencode)[0], opencode)
 
 const agents = [

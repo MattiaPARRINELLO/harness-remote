@@ -732,6 +732,7 @@ async function refreshStatus(entry: NativeConversationEntry): Promise<void> {
 
     if (openCode) {
       if (nativeSessionIsWorking(next)) {
+        if (entry.forcedStatus === "cancelled") return
         entry.statusType = next
         entry.error = null
         entry.openCodeIdleObservedAt = null

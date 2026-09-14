@@ -105,7 +105,7 @@ async function main() {
     return
   }
 
-  const { config, openCode, openCodeCommand, openCodeHost, openCodePort, openCodeTimeout } = parsed
+  const { config, openCode, openCodeCommand: defaultOpenCodeCommand, openCodeHost, openCodePort, openCodeTimeout } = parsed
   if (config.help) {
     process.stdout.write(`${daemonUsage()}\n`)
     return
@@ -176,6 +176,7 @@ async function main() {
   if (openCode) {
     const managedBackend = plan.detected.includes("mimocode") ? "mimocode" : "opencode"
     const managedLabel = managedBackend === "mimocode" ? "Mimocode" : "OpenCode"
+    const openCodeCommand = resolveOpenCodeCommand(process.env, { backend: managedBackend })
     const managedOpenCode = new ManagedOpenCodeHost({
       command: openCodeCommand,
       host: openCodeHost,

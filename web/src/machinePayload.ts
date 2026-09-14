@@ -46,7 +46,7 @@ export function machineCandidates(config: ServerConfig): ServerConfig[] {
   if (!isOpenCodeLike(config.backend) || config.port === DEFAULT_MACHINE_DAEMON_PORT) return [current]
   return [
     current,
-    { ...config, port: DEFAULT_MACHINE_DAEMON_PORT, agentId: config.agentId?.trim() || "opencode" }
+    { ...config, port: DEFAULT_MACHINE_DAEMON_PORT, agentId: config.agentId?.trim() || config.backend }
   ]
 }
 

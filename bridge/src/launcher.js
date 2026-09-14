@@ -13,7 +13,7 @@ const BACKEND_EXECUTABLES = {
   pi: ["pi"],
   claude: ["claude"],
   codex: ["codex"],
-  opencode: ["opencode", "mimo"],
+  opencode: ["opencode"],
   mimocode: ["mimo"]
 }
 
@@ -67,6 +67,13 @@ export function findExecutable(name, { pathValue = process.env.PATH ?? "", platf
 export function resolveOpenCodeCommand(environment = process.env, options = {}) {
   const pathValue = environment.PATH ?? ""
   const find = (name) => findExecutable(name, { pathValue, ...options })
+  const backendHint = options.backend
+  if (backendHint === "mimocode") {
+    return environment.HARNESS_REMOTE_OPENCODE_COMMAND
+      ?? find("mimo")
+      ?? find("opencode")
+      ?? "mimo"
+  }
   return environment.HARNESS_REMOTE_OPENCODE_COMMAND
     ?? find("opencode")
     ?? find("mimo")
@@ -359,7 +366,7 @@ async function main() {
 
   if (backend === "opencode" || backend === "mimocode") {
     process.stdout.write("\nStarting managed OpenCode host...\n")
-    const managed = await startManagedOpenCode({ host, port, username, password, command: resolveOpenCodeCommand() })
+    const managed = await startManagedOpenCode({ host, port, username, password, command: resolveOpenCodeCommand(process.env, { backend }) })
     process.stdout.write(`OpenCode is ready on ${host}:${port}. Keep this process running while Harness Remote is connected.\n`)
 
     let shuttingDown = false
