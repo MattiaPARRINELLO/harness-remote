@@ -121,6 +121,7 @@ type TranslationKey =
   | 'detail.jumpToLatest'
   | 'detail.you'
   | 'detail.opencode'
+  | 'detail.mimocode'
   | 'detail.projectDashboardLabel'
   | 'detail.projectLabel'
   | 'detail.vcsLabel'
@@ -213,6 +214,7 @@ type TranslationKey =
   | 'connect.step.address'
   | 'connect.step.credentials'
   | 'connect.harness.opencode'
+  | 'connect.harness.mimocode'
   | 'connect.harness.omp'
   | 'connect.harness.pi'
   | 'connect.harness.claude'
@@ -592,6 +594,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'detail.jumpToLatest': 'Go to latest',
     'detail.you': '👤 You',
     'detail.opencode': '🤖 OpenCode',
+    'detail.mimocode': '🧠 Mimocode',
     'detail.projectDashboardLabel': 'Project and VCS dashboard',
     'detail.projectLabel': 'Project',
     'detail.vcsLabel': 'VCS',
@@ -751,6 +754,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'connect.step.address': 'Address',
     'connect.step.credentials': 'Credentials',
     'connect.harness.opencode': 'Connect directly to an OpenCode server.',
+    'connect.harness.mimocode': 'Connect directly to a Mimocode server.',
     'connect.harness.omp': 'Connect through the bundled Oh My Pi bridge.',
     'connect.harness.pi': 'Connect to PI through the ACP bridge.',
     'connect.harness.claude': 'Connect to Claude Code through the ACP bridge.',
@@ -1063,6 +1067,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'detail.jumpToLatest': 'Vai alla fine',
     'detail.you': '👤 Tu',
     'detail.opencode': '🤖 OpenCode',
+    'detail.mimocode': '🧠 Mimocode',
     'detail.projectDashboardLabel': 'Dashboard progetto e VCS',
     'detail.projectLabel': 'Progetto',
     'detail.vcsLabel': 'VCS',
@@ -1222,6 +1227,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'connect.step.address': 'Indirizzo',
     'connect.step.credentials': 'Credenziali',
     'connect.harness.opencode': 'Connessione diretta a un server OpenCode.',
+    'connect.harness.mimocode': 'Connessione diretta a un server Mimocode.',
     'connect.harness.omp': 'Connessione tramite il bridge incluso per Oh My Pi.',
     'connect.harness.pi': 'Connessione a PI tramite bridge ACP.',
     'connect.harness.claude': 'Connessione a Claude Code tramite bridge ACP.',
@@ -1534,6 +1540,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'detail.jumpToLatest': '前往最新',
     'detail.you': '👤 你',
     'detail.opencode': '🤖 OpenCode',
+    'detail.mimocode': '🧠 Mimocode',
     'detail.projectDashboardLabel': '專案與 VCS 儀表板',
     'detail.projectLabel': '專案',
     'detail.vcsLabel': 'VCS',
@@ -1954,6 +1961,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'detail.jumpToLatest': '前往最新',
     'detail.you': '👤 你',
     'detail.opencode': '🤖 OpenCode',
+    'detail.mimocode': '🧠 Mimocode',
     'detail.projectDashboardLabel': '项目与 VCS 仪表盘',
     'detail.projectLabel': '项目',
     'detail.vcsLabel': 'VCS',
@@ -2046,6 +2054,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     'connect.step.address': '地址',
     'connect.step.credentials': '凭据',
     'connect.harness.opencode': '直接连接到 OpenCode 服务器。',
+    'connect.harness.mimocode': '直接连接到 Mimocode 服务器。',
     'connect.harness.omp': '通过附带的 Oh My Pi 桥接器连接。',
     'connect.harness.pi': '通过 ACP 桥接器连接到 PI。',
     'connect.harness.claude': '通过 ACP 桥接器连接到 Claude Code。',

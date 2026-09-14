@@ -1,6 +1,6 @@
 import { api } from "./api"
 import type { NativeSessionSurfaceTarget } from "./native-session-discovery"
-import type { MessageEnvelope, ModelSelection } from "./types"
+import { isOpenCodeLike, type MessageEnvelope, type ModelSelection } from "./types"
 
 type NativeMessageInfo = MessageEnvelope["info"] & {
   model?: {
@@ -117,7 +117,7 @@ const PAGE_MODEL_BACKENDS = new Set(["omp", "pi", "codex"])
 export async function resolveNativeSessionTargetModel(
   target: NativeSessionSurfaceTarget
 ): Promise<NativeSessionSurfaceTarget> {
-  if (target.backend !== "opencode" && target.backend !== "claude" && !PAGE_MODEL_BACKENDS.has(target.backend)) return target
+  if (!isOpenCodeLike(target.backend) && target.backend !== "claude" && !PAGE_MODEL_BACKENDS.has(target.backend)) return target
   try {
     const page = await api.loadMessagePage(
       target.config,
@@ -127,7 +127,7 @@ export async function resolveNativeSessionTargetModel(
       20,
       false
     )
-    let model = page.model ?? (target.backend === "opencode" ? lastNativeMessageModel(page.messages) : null)
+    let model = page.model ?? (isOpenCodeLike(target.backend) ? lastNativeMessageModel(page.messages) : null)
     if (!model && target.backend === "claude") {
       const models = await api.listModels(target.config, target.directory, target.sessionID)
       const current = models.find((candidate) => candidate.isDefault)

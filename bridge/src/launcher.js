@@ -13,7 +13,8 @@ const BACKEND_EXECUTABLES = {
   pi: ["pi"],
   claude: ["claude"],
   codex: ["codex"],
-  opencode: ["opencode"]
+  opencode: ["opencode", "mimo"],
+  mimocode: ["mimo"]
 }
 
 // This is product policy, not alphabetical order: prefer the broadest/most-tested ACP path first.
@@ -60,6 +61,18 @@ export function findExecutable(name, { pathValue = process.env.PATH ?? "", platf
   return null
 }
 
+// OpenCode and mimocode (a native OpenCode fork) expose the same HTTP server contract, so either
+// binary can back the managed OpenCode host. Prefer the upstream name, then the fork, then fall
+// back to the upstream name so a missing install still surfaces the familiar spawn error.
+export function resolveOpenCodeCommand(environment = process.env, options = {}) {
+  const pathValue = environment.PATH ?? ""
+  const find = (name) => findExecutable(name, { pathValue, ...options })
+  return environment.HARNESS_REMOTE_OPENCODE_COMMAND
+    ?? find("opencode")
+    ?? find("mimo")
+    ?? "opencode"
+}
+
 export function detectBackends(options = {}) {
   return Object.entries(BACKEND_EXECUTABLES)
     .filter(([, commands]) => commands.some((command) => findExecutable(command, options)))
@@ -83,7 +96,7 @@ export function resolveLaunchPlan(args, detected = detectBackends()) {
 
   if (detected.length === 0) {
     if (explicit) return { mode: "single", backend: explicit, detected }
-    throw new Error("No supported agent CLI was found on PATH. Install/select omp, pi, claude, codex, or opencode, then re-run with --backend if needed.")
+    throw new Error("No supported agent CLI was found on PATH. Install/select omp, pi, claude, codex, opencode, or mimocode, then re-run with --backend if needed.")
   }
 
   if (forceSingle) {
@@ -96,9 +109,9 @@ export function resolveLaunchPlan(args, detected = detectBackends()) {
 
   if (detected.length === 1) return { mode: "single", backend: explicit ?? detected[0], detected }
 
-  if (explicit === "opencode") return { mode: "single", backend: explicit, detected }
+  if (explicit === "opencode" || explicit === "mimocode") return { mode: "single", backend: explicit, detected }
   if (explicit && !ACP_BACKENDS.includes(explicit)) {
-    throw new Error(`Unsupported ACP backend '${explicit}' for machine-daemon startup.`)
+    throw new Error(`Unsupported ACP backend '${explicit}' for machine-daemon startup. Use 'opencode' or 'mimocode' for single-backend mode, or one of: omp, pi, claude, codex.`)
   }
 
   const primary = explicit ?? ACP_BACKENDS.find((backend) => detected.includes(backend))
@@ -107,7 +120,7 @@ export function resolveLaunchPlan(args, detected = detectBackends()) {
     mode: "daemon",
     backend: primary,
     detected,
-    openCode: detected.includes("opencode")
+    openCode: detected.includes("opencode") || detected.includes("mimocode")
   }
 }
 
@@ -222,7 +235,7 @@ export function lanAddresses(interfaces = networkInterfaces()) {
 }
 
 export function launcherUsage() {
-  return `Usage: harness-remote [options]\n\nQuick start options:\n  --backend <name>       Select omp, pi, claude, codex, or opencode (on multi-agent machines, selects the daemon primary)\n  --single               Force the legacy single-backend path instead of the machine daemon\n  --host <host>          Bind host (quick-start default: 0.0.0.0)\n  --port <port>          Preferred port (OpenCode single-host default: 4096; daemon/ACP default: 4097)\n  --username <username>  Override generated Basic Auth username\n  --password <password>  Override generated Basic Auth password\n  --help                 Show this help\n\nWith one detected agent, Harness starts the existing single-backend path. With multiple detected agents and at least one ACP backend, it starts the machine daemon automatically; OpenCode is included when installed and receives a free loopback port automatically.`
+  return `Usage: harness-remote [options]\n\nQuick start options:\n  --backend <name>       Select omp, pi, claude, codex, opencode, or mimocode (on multi-agent machines, selects the daemon primary)\n  --single               Force the legacy single-backend path instead of the machine daemon\n  --host <host>          Bind host (quick-start default: 0.0.0.0)\n  --port <port>          Preferred port (OpenCode/Mimocode single-host default: 4096; daemon/ACP default: 4097)\n  --username <username>  Override generated Basic Auth username\n  --password <password>  Override generated Basic Auth password\n  --help                 Show this help\n\nWith one detected agent, Harness starts the existing single-backend path. With multiple detected agents and at least one ACP backend, it starts the machine daemon automatically; OpenCode/Mimocode is included when installed and receives a free loopback port automatically.`
 }
 
 export async function startManagedOpenCode({ host, port, username, password, command = "opencode", Host = ManagedOpenCodeHost } = {}) {
@@ -273,7 +286,7 @@ async function main() {
   const plan = resolveLaunchPlan(args)
   const backend = plan.backend
   const host = optionValue(args, "--host") ?? "0.0.0.0"
-  const defaultPort = plan.mode === "daemon" ? 4097 : backend === "opencode" ? 4096 : 4097
+  const defaultPort = plan.mode === "daemon" ? 4097 : (backend === "opencode" || backend === "mimocode") ? 4096 : 4097
   const requestedPort = Number(optionValue(args, "--port") ?? defaultPort)
   if (!Number.isInteger(requestedPort) || requestedPort < 1 || requestedPort > 65_535) {
     throw new Error("--port must be an integer between 1 and 65535")
@@ -328,7 +341,7 @@ async function main() {
     process.stdout.write("\nHarnesses detected on this machine:\n")
     for (const agent of plan.detected) {
       if (agent === backend) process.stdout.write(`  • ${agent} — selected as primary\n`)
-      else if (agent === "opencode") process.stdout.write("  • opencode — will be started by the daemon\n")
+      else if (agent === "opencode" || agent === "mimocode") process.stdout.write(`  • ${agent} — will be started by the daemon\n`)
       else process.stdout.write(`  • ${agent} — detected, not started\n`)
     }
     process.stdout.write("\n")
@@ -344,9 +357,9 @@ async function main() {
     return
   }
 
-  if (backend === "opencode") {
+  if (backend === "opencode" || backend === "mimocode") {
     process.stdout.write("\nStarting managed OpenCode host...\n")
-    const managed = await startManagedOpenCode({ host, port, username, password })
+    const managed = await startManagedOpenCode({ host, port, username, password, command: resolveOpenCodeCommand() })
     process.stdout.write(`OpenCode is ready on ${host}:${port}. Keep this process running while Harness Remote is connected.\n`)
 
     let shuttingDown = false

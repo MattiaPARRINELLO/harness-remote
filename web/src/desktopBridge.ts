@@ -12,7 +12,7 @@ import type {
   DesktopResponse
 } from "../electron/ipc-contract"
 import { normalizeServerConfig } from "./serverConfig"
-import type { ServerConfig } from "./types"
+import { isOpenCodeLike, type ServerConfig } from "./types"
 
 export type DesktopPlatform = { isDesktop: true; os: string; usesNativeMenu?: boolean }
 export type DesktopBridgeAPI = {
@@ -85,11 +85,11 @@ export type DesktopProfileSource = {
  */
 export function toDesktopProfiles(profiles: readonly DesktopProfileSource[]): DesktopProfile[] {
   return profiles.flatMap((profile) => {
-    const normalized = normalizeServerConfig({ ...profile.config, backend: "opencode", agentId: undefined })
+    const normalized = normalizeServerConfig({ ...profile.config, backend: isOpenCodeLike(profile.config.backend) ? profile.config.backend : "opencode", agentId: undefined })
     if (!normalized) return []
     return [{
       id: profile.id,
-      backend: "opencode",
+      backend: profile.config.backend || "opencode",
       host: normalized.host,
       port: normalized.port,
       username: normalized.username,

@@ -126,6 +126,25 @@ export const HARNESS_PROFILES = {
       sessionDelete: true
     }
   },
+  mimocode: {
+    id: "mimocode",
+    label: "Mimocode",
+    command: "mimo",
+    args: ["acp"],
+    permissionMode: "allow",
+    // Mimocode is an OpenCode fork with the same HTTP server contract. It shares the OpenCode
+    // history loader because the session storage format is identical.
+    modelVariantConfigIDs: [],
+    capabilities: {
+      ...COMMON_CAPABILITIES,
+      models: true,
+      todos: false,
+      commands: true,
+      actions: false,
+      sessionRename: true,
+      sessionDelete: true
+    }
+  },
   codex: {
     id: "codex",
     label: "Codex CLI",

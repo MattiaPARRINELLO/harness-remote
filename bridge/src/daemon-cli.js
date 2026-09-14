@@ -7,7 +7,7 @@ import { AcpAgentModelCatalog, HttpAgentModelCatalog } from "./agent-model-catal
 import { parseConfig, usage as bridgeUsage } from "./config.js"
 import { acpHarnessCapabilityContract, openCodeCapabilityContract } from "./harness-capability-contract.js"
 import { harnessProfile, resolveAcpLaunch } from "./harness-profiles.js"
-import { canListen, canListenForBind, harnessPortUnavailableMessage, resolveLaunchPlan } from "./launcher.js"
+import { canListen, canListenForBind, harnessPortUnavailableMessage, resolveLaunchPlan, resolveOpenCodeCommand } from "./launcher.js"
 import { loadMachineIdentity } from "./machine-registry.js"
 import { MachineDaemon, createMachineDaemonServer } from "./machine-daemon.js"
 import { ManagedOpenCodeHost } from "./opencode-host.js"
@@ -28,7 +28,7 @@ export function parseDaemonOptions(args, environment = process.env, detect = res
   const bridgeArgs = []
   const options = {
     openCode: true,
-    openCodeCommand: environment.HARNESS_REMOTE_OPENCODE_COMMAND ?? "opencode",
+    openCodeCommand: resolveOpenCodeCommand(environment),
     openCodeHost: environment.HARNESS_REMOTE_OPENCODE_HOST ?? "127.0.0.1",
     openCodePort: parsePort(environment.HARNESS_REMOTE_OPENCODE_PORT ?? "4096", "--opencode-port"),
     openCodeTimeout: Number(environment.HARNESS_REMOTE_OPENCODE_TIMEOUT ?? "15000")
@@ -120,7 +120,7 @@ async function main() {
   const identity = await loadMachineIdentity(config.stateDirectory)
   const daemon = new MachineDaemon(identity)
   const plan = resolveLaunchPlan(process.argv.slice(2))
-  const acpBackends = [...new Set([...plan.detected.filter((backend) => backend !== "opencode"), config.backend])]
+  const acpBackends = [...new Set([...plan.detected.filter((backend) => backend !== "opencode" && backend !== "mimocode"), config.backend])]
   const primaryProfile = harnessProfile(config.backend)
   const acpHosts = new Map()
   for (const backend of acpBackends) {
@@ -174,6 +174,8 @@ async function main() {
   if (!acp) throw new Error(`Primary harness ${primaryProfile.id} was not detected`)
 
   if (openCode) {
+    const managedBackend = plan.detected.includes("mimocode") ? "mimocode" : "opencode"
+    const managedLabel = managedBackend === "mimocode" ? "Mimocode" : "OpenCode"
     const managedOpenCode = new ManagedOpenCodeHost({
       command: openCodeCommand,
       host: openCodeHost,
@@ -182,16 +184,15 @@ async function main() {
       password: config.password,
       startTimeoutMs: openCodeTimeout
     })
-    managedOpenCode.on("stderr", (line) => process.stderr.write(`[opencode] ${line}\n`))
-    const openCodeModels = new HttpAgentModelCatalog({ host: managedOpenCode, agentID: "opencode" })
-    // OpenCode is intentionally lazy like the ACP harnesses. Starting its Bun server during daemon
-    // boot used resources before the user selected it and also surfaced upstream GlobalBus listener
-    // warnings immediately. Model discovery, task launch, or a routed OpenCode request starts it on
-    // first use through the host's idempotent start() path.
+    managedOpenCode.on("stderr", (line) => process.stderr.write(`[${managedBackend}] ${line}\n`))
+    const openCodeModels = new HttpAgentModelCatalog({ host: managedOpenCode, agentID: managedBackend })
+    // OpenCode/Mimocode is intentionally lazy like the ACP harnesses. Starting its server during daemon
+    // boot used resources before the user selected it. Model discovery, task launch, or a routed
+    // request starts it on first use through the host's idempotent start() path.
     daemon.registerManagedHttpHost({
-      id: "opencode",
-      label: "OpenCode",
-      backend: "opencode",
+      id: managedBackend,
+      label: managedLabel,
+      backend: managedBackend,
       // These are native OpenCode HTTP primitives, not Session-first inventions. Advertising the
       // complete mutation subset lets the UI expose the same rename/delete/stop/model controls as
       // the direct OpenCode surface instead of treating a managed host as read-only.

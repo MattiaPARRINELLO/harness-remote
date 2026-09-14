@@ -3,6 +3,7 @@ import {
   type NativeSessionClaimTransport
 } from "./native-session-claim"
 import type { NativeSessionSurfaceTarget } from "./native-session-discovery"
+import { isOpenCodeLike } from "./types"
 
 export type NativeSessionContinuationResult = {
   writable: boolean
@@ -26,7 +27,7 @@ export async function probeNativeSessionContinuation(
   target: NativeSessionSurfaceTarget,
   client: NativeSessionContinuationApi = nativeSessionClaimTransport
 ): Promise<NativeSessionContinuationResult> {
-  if (target.backend === "opencode") return { writable: true }
+  if (isOpenCodeLike(target.backend)) return { writable: true }
   if (!target.requiresExplicitClaim) return { writable: true }
 
   try {

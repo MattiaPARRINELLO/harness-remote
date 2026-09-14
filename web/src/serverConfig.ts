@@ -1,4 +1,4 @@
-import type { ServerConfig } from "./types.js"
+import { isOpenCodeLike, type ServerConfig } from "./types.js"
 
 /**
  * Kept free of Capacitor imports so it can be unit tested directly: the rules here
@@ -78,7 +78,7 @@ export function routingHeaders(
   config: Pick<ServerConfig, "backend" | "agentId">,
   { preflight = true }: { preflight?: boolean } = {}
 ): Record<string, string> {
-  if (preflight && config.backend === "opencode" && !config.agentId?.trim()) return {}
+  if (preflight && isOpenCodeLike(config.backend) && !config.agentId?.trim()) return {}
   return { "X-Harness-Backend": config.backend }
 }
 

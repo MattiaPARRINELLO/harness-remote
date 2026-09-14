@@ -16,7 +16,7 @@ import {
 } from "../native-session-v3-adapter"
 import type { ConversationRuntime } from "../conversation-runtime"
 import type { AgentModelScope } from "../taskClient"
-import type { CommandInfo, MachineAgentHost } from "../types"
+import { isOpenCodeLike, type CommandInfo, type MachineAgentHost } from "../types"
 import { LoadingIcon } from "../Icons"
 import { WorkThreadConversation } from "./work-thread-conversation"
 import "../native-session-observer.css"
@@ -56,7 +56,7 @@ function targetForInitialRuntime(target: NativeSessionSurfaceTarget): NativeSess
   // actually used by the latest turn. Treat those list values as provisional: mount immediately
   // without them, then let native message/rollout metadata refine the already-visible controller.
   // OMP/PI branch metadata and Claude ACP config are already authoritative on their normal paths.
-  return target.backend === "opencode" || target.backend === "codex"
+  return isOpenCodeLike(target.backend) || target.backend === "codex"
     ? { ...target, model: null }
     : target
 }

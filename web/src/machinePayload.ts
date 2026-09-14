@@ -1,4 +1,4 @@
-import type { MachineSnapshot, ServerConfig } from "./types"
+import { isOpenCodeLike, type MachineSnapshot, type ServerConfig } from "./types"
 
 /**
  * Pure machine-discovery helpers. These distinguish a direct harness endpoint from the machine
@@ -43,7 +43,7 @@ export function isProjectListing(value: unknown): boolean {
 
 export function machineCandidates(config: ServerConfig): ServerConfig[] {
   const current = { ...config }
-  if (config.backend !== "opencode" || config.port === DEFAULT_MACHINE_DAEMON_PORT) return [current]
+  if (!isOpenCodeLike(config.backend) || config.port === DEFAULT_MACHINE_DAEMON_PORT) return [current]
   return [
     current,
     { ...config, port: DEFAULT_MACHINE_DAEMON_PORT, agentId: config.agentId?.trim() || "opencode" }

@@ -2,7 +2,7 @@ import { App as CapacitorApp } from "@capacitor/app"
 import { Capacitor, type PluginListenerHandle } from "@capacitor/core"
 import type { SavedServerProfile } from "./workspaceMachines"
 import { subscribeTaskDeskLiveEvents } from "./taskdesk-live-events"
-import type { ServerConfig } from "./types"
+import { isOpenCodeLike, type ServerConfig } from "./types"
 
 export type SessionLiveTarget = {
   key: string
@@ -190,7 +190,7 @@ export function startTaskDeskSessionLiveRefresh({
       if (event.type === "session.error" && selectedEvent) {
         throttle("message", 140, onMessage)
         throttle("detail", 250, onDetail)
-        if (target.config.backend === "opencode") {
+        if (isOpenCodeLike(target.config.backend)) {
           throttle("index", 120, onIndex)
           settleAfterLifecycle()
         }
