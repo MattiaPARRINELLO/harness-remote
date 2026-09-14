@@ -1,5 +1,8 @@
 export type BackendKind = "opencode" | "mimocode" | "omp" | "pi" | "claude" | "codex"
 
+/** Canonical list of supported backends. Import this instead of duplicating Sets or arrays. */
+export const BACKEND_KINDS: readonly BackendKind[] = ["opencode", "mimocode", "omp", "pi", "claude", "codex"]
+
 export function isOpenCodeLike(backend: BackendKind): boolean {
   return backend === "opencode" || backend === "mimocode"
 }

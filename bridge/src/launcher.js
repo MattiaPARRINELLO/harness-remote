@@ -365,9 +365,10 @@ async function main() {
   }
 
   if (backend === "opencode" || backend === "mimocode") {
-    process.stdout.write("\nStarting managed OpenCode host...\n")
+    const displayName = backend === "mimocode" ? "Mimocode" : "OpenCode"
+    process.stdout.write(`\nStarting managed ${displayName} host...\n`)
     const managed = await startManagedOpenCode({ host, port, username, password, command: resolveOpenCodeCommand(process.env, { backend }) })
-    process.stdout.write(`OpenCode is ready on ${host}:${port}. Keep this process running while Harness Remote is connected.\n`)
+    process.stdout.write(`${displayName} is ready on ${host}:${port}. Keep this process running while Harness Remote is connected.\n`)
 
     let shuttingDown = false
     const shutdown = createManagedShutdown(managed)

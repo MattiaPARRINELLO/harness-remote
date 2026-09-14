@@ -1,6 +1,7 @@
 import { api, type NativeSessionLinkRecord } from "./api"
 import { nativeSessionDisplayTitle } from "./native-session-title"
 import type { BackendKind, MachineAgentHost, MessageEnvelope, ModelSelection, ServerConfig, Session, SessionStatus } from "./types"
+import { BACKEND_KINDS } from "./types"
 
 export type NativeSessionRecord = {
   key: string
@@ -96,9 +97,7 @@ export type NativeSessionSurfaceTarget = {
 }
 
 function supportedBackend(value: string, fallback: BackendKind): BackendKind {
-  return value === "opencode" || value === "mimocode" || value === "omp" || value === "pi" || value === "claude" || value === "codex"
-    ? value
-    : fallback
+  return (BACKEND_KINDS as readonly string[]).includes(value) ? value as BackendKind : fallback
 }
 
 function supportedStopCapability(value: string | undefined): boolean {

@@ -4,6 +4,7 @@ import { unwrapPayload } from "./machinePayload"
 import { authHeader, hasCredentials, machineBaseUrl } from "./serverConfig"
 import type { AttachmentPart } from "./attachments"
 import type { BackendKind, ModelOption, ModelSelection, ServerConfig } from "./types"
+import { BACKEND_KINDS } from "./types"
 
 const BROWSER_MACHINE_REQUEST_TIMEOUT_MS = 12_000
 const LIST_STALE_GRACE_MS = 45_000
@@ -181,7 +182,7 @@ function modelScopeKey(scope: AgentModelScope): string {
   return "default"
 }
 
-const AGENT_BACKENDS = new Set<BackendKind>(["opencode", "mimocode", "omp", "pi", "claude", "codex"])
+const AGENT_BACKENDS = new Set<BackendKind>(BACKEND_KINDS)
 
 /**
  * Model membership belongs to the selected harness, not to the machine profile that happened to

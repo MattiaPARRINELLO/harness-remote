@@ -2,9 +2,9 @@ import { mkdir, open, readFile, rename, rm } from "node:fs/promises"
 import { dirname } from "node:path"
 import { baseUrl } from "../src/serverConfig.js"
 import type { BackendKind } from "../src/types.js"
+import { BACKEND_KINDS } from "../src/types.js"
 import type { DesktopProfile } from "./ipc-contract.js"
 
-const BACKENDS: readonly BackendKind[] = ["opencode", "mimocode", "omp", "pi", "claude", "codex"]
 const MAX_PROFILE_COUNT = 100
 const MAX_PROFILE_ID_LENGTH = 128
 const MAX_HOST_LENGTH = 2048
@@ -19,7 +19,7 @@ export class DesktopProfileError extends Error {
 }
 
 function isBackend(value: unknown): value is BackendKind {
-  return typeof value === "string" && BACKENDS.includes(value as BackendKind)
+  return typeof value === "string" && BACKEND_KINDS.includes(value as BackendKind)
 }
 
 function hasControlCharacters(value: string): boolean {

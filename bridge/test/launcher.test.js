@@ -81,6 +81,23 @@ test("keeps explicit OpenCode on the single-host path", () => {
   assert.deepEqual(resolveLaunchPlan(["--backend", "opencode"], ["codex", "opencode"]), { mode: "single", backend: "opencode", detected: ["codex", "opencode"] })
 })
 
+test("keeps explicit mimocode on the single-host path with default port 4096", () => {
+  assert.deepEqual(resolveLaunchPlan(["--backend", "mimocode"], ["mimocode"]), { mode: "single", backend: "mimocode", detected: ["mimocode"] })
+})
+
+test("prefers opencode over mimocode when both are detected in daemon mode", () => {
+  assert.deepEqual(resolveLaunchPlan([], ["claude", "opencode", "mimocode"]), { mode: "daemon", backend: "claude", detected: ["claude", "opencode", "mimocode"], openCode: true })
+})
+
+test("detects only mimocode when opencode is absent", () => {
+  assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => value === path.join("/tools", "mimo"), access: () => {} }), ["mimocode"])
+})
+
+test("detects both opencode and mimocode independently when both exist", () => {
+  const both = new Set([path.join("/tools", "opencode"), path.join("/tools", "mimo")])
+  assert.deepEqual(detectBackends({ pathValue: "/tools", platform: "linux", exists: (value) => both.has(value), access: () => {} }).sort(), ["mimocode", "opencode"])
+})
+
 test("starts a daemon without OpenCode when multiple ACP agents are detected", () => {
   assert.deepEqual(resolveLaunchPlan([], ["omp", "claude"]), { mode: "daemon", backend: "claude", detected: ["omp", "claude"], openCode: false })
 })

@@ -9,8 +9,9 @@ import type { NativeSessionRouteContinueInput, NativeSessionRouteMachine } from 
 import type { SavedServerProfile } from "../workspaceMachines"
 import { taskClient, type AgentModelScope } from "../taskClient"
 import { startTaskDeskSessionLiveRefresh } from "../taskdesk-session-live-refresh"
-import type {
-  BackendKind,
+import {
+  type BackendKind,
+  BACKEND_KINDS,
   CommandInfo,
   MachineAgentHost,
   MessageEnvelope,
@@ -125,9 +126,7 @@ function assistantMessageHasSignal(message: WorkThreadMessage): boolean {
 }
 
 function supportedBackend(value: string, fallback: BackendKind): BackendKind {
-  return value === "opencode" || value === "mimocode" || value === "omp" || value === "pi" || value === "claude" || value === "codex"
-    ? value
-    : fallback
+  return (BACKEND_KINDS as readonly string[]).includes(value) ? value as BackendKind : fallback
 }
 
 function configForAgent(base: ServerConfig, agents: MachineAgentHost[], agentID: string): ServerConfig {
