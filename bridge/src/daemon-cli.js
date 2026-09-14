@@ -174,7 +174,7 @@ async function main() {
   if (!acp) throw new Error(`Primary harness ${primaryProfile.id} was not detected`)
 
   if (openCode) {
-    const managedBackend = plan.detected.includes("mimocode") ? "mimocode" : "opencode"
+    const managedBackend = ["opencode", "mimocode"].find((backend) => plan.detected.includes(backend)) ?? "opencode"
     const managedLabel = managedBackend === "mimocode" ? "Mimocode" : "OpenCode"
     const openCodeCommand = resolveOpenCodeCommand(process.env, { backend: managedBackend })
     const managedOpenCode = new ManagedOpenCodeHost({
