@@ -64,7 +64,7 @@ assert.match(taskClient, /export function modelCatalogConfig\(/)
 // same validated routing hint and desktop SSE authorization still comes from the approved config.
 assert.match(serverConfig, /export function routingHeaders\(/)
 assert.ok(serverConfig.includes('return { "X-Harness-Backend": config.backend }'))
-assert.ok(serverConfig.includes('if (preflight && config.backend === "opencode" && !config.agentId?.trim()) return {}'))
+assert.ok(serverConfig.includes('if (preflight && isOpenCodeLike(config.backend) && !config.agentId?.trim()) return {}'))
 assert.ok(desktopRequestTransport.includes('isExplicitMachineScopedRequest(request.path)'))
 assert.ok(desktopRequestTransport.includes('routingHeaders(targetProfile, { preflight: false })'))
 assert.ok(desktopEventTransport.includes('...routingHeaders(targetProfile, { preflight: false })'))

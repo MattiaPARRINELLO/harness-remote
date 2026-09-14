@@ -1,4 +1,8 @@
-export type BackendKind = "opencode" | "omp" | "pi" | "claude" | "codex"
+export type BackendKind = "opencode" | "mimocode" | "omp" | "pi" | "claude" | "codex"
+
+export function isOpenCodeLike(backend: BackendKind): boolean {
+  return backend === "opencode" || backend === "mimocode"
+}
 
 export type ServerConfig = {
   backend: BackendKind

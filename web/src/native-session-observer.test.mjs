@@ -48,7 +48,7 @@ assert.ok(nativeModel.includes('page.model ??'), 'native Session enrichment must
 // change to which harnesses expose native model metadata - adding PI, Codex, Claude - broke this
 // check while the behaviour it protects was still intact.
 assert.ok(nativeModel.includes('PAGE_MODEL_BACKENDS'), 'model enrichment must scope itself with an explicit set of harnesses that expose native model metadata')
-assert.match(nativeModel, /if \(target\.backend !== "opencode"[\s\S]{0,200}?\) return target/, 'read-only model enrichment must stay scoped to harnesses with verified native model metadata')
+assert.match(nativeModel, /if \(!isOpenCodeLike\(target\.backend\)[\s\S]{0,200}?\) return target/, 'read-only model enrichment must stay scoped to harnesses with verified native model metadata')
 assert.ok(workThread.includes('observedConversationModelKeyRef'), 'the v3 picker must observe a model that arrives after the controller mounted')
 assert.ok(workThread.includes('modelSelectionTouchedRef'), 'late native enrichment must not overwrite a model the user explicitly picked')
 assert.ok(workThread.includes('currentConversationModelKey === previous'), 'the late-model sync must be edge-triggered rather than resetting the picker on every render')
