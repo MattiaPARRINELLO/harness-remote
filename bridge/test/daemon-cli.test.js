@@ -77,6 +77,23 @@ test("daemon OpenCode preflight has a working default listener probe", async () 
   })
 })
 
+test("daemon --opencode-command marks the command as explicit so it cannot be overridden by backend detection", () => {
+  const parsed = parseDaemonOptions(["--opencode-command", "/custom/mimo"], loopbackEnv)
+  assert.equal(parsed.openCodeCommand, "/custom/mimo")
+  assert.equal(parsed.openCodeCommandExplicit, true, "an explicit CLI command must be marked authoritative")
+})
+
+test("daemon HARNESS_REMOTE_OPENCODE_COMMAND env marks the command as explicit", () => {
+  const parsed = parseDaemonOptions([], { ...loopbackEnv, HARNESS_REMOTE_OPENCODE_COMMAND: "/env/custom" })
+  assert.equal(parsed.openCodeCommand, "/env/custom")
+  assert.equal(parsed.openCodeCommandExplicit, true, "an env override must be marked authoritative")
+})
+
+test("daemon auto-resolved command is not marked explicit", () => {
+  const parsed = parseDaemonOptions([], loopbackEnv)
+  assert.equal(parsed.openCodeCommandExplicit, false, "auto-discovered commands must not be treated as explicit overrides")
+})
+
 test("daemon preflight rejects a wildcard port shadowed by a local listener", async () => {
   await assert.rejects(ensureHarnessPortAvailable({
     port: 4097,

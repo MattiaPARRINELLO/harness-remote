@@ -25,8 +25,10 @@ globalThis.localStorage ??= {
 
 const { api } = await import('./api.ts')
 const directories = []
+let listStatusesCalls = 0
 let statuses = {}
 api.listStatuses = async (_config, directory) => {
+  listStatusesCalls += 1
   directories.push(directory)
   return statuses
 }
@@ -124,6 +126,19 @@ test('listStatuses receives the directory for OpenCode-like backends', async () 
     statuses = {}
     await registration.controller.refreshConversation(CONFIG, registration.conversation.id)
     assert.equal(directories.at(-1), '/repo', 'directory must be forwarded to the status endpoint')
+  } finally {
+    registration.dispose()
+  }
+})
+
+test('an internal idle pre-Send OpenCode Session does not call listStatuses at all', async () => {
+  const registration = registerNativeSessionV3Adapter(target({ external: false }), () => {})
+  try {
+    listStatusesCalls = 0
+    statuses = { s1: { type: 'busy' } }
+    await registration.controller.refreshConversation(CONFIG, registration.conversation.id)
+    assert.equal(listStatusesCalls, 0, 'internal idle sessions must not call listStatuses (#351 contract)')
+    assert.equal(registration.conversation.status, 'completed', 'must remain completed, not adopt the busy status')
   } finally {
     registration.dispose()
   }

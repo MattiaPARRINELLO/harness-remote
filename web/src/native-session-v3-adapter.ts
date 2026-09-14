@@ -724,9 +724,17 @@ async function refreshStatus(entry: NativeConversationEntry): Promise<void> {
   // Session renders as completed and the transcript heuristic shows a false interruption.
   const now = Date.now()
   const openCode = isOpenCodeLike(entry.target.backend)
+  const openCodeRecoveryWatchActive = openCode
+    && entry.openCodeRecoveryWatchUntil > now
+
+  // Preserve the #351 contract: internal idle/pre-Send OpenCode sessions never call
+  // /session/status — the endpoint can be slow/unreliable and delays prompt delivery.
+  // External sessions (started outside the app in a terminal) need this read to adopt
+  // a busy turn we never initiated.
+  if (openCode && !entry.target.external && entry.forcedStatus !== "running" && !openCodeRecoveryWatchActive) return
 
   try {
-    const statuses = await api.listStatuses(entry.target.config, openCode ? entry.target.directory : undefined)
+    const statuses = await api.listStatuses(entry.target.config, openCode && entry.target.external ? entry.target.directory : undefined)
     const next = statuses[entry.target.sessionID]?.type
     if (typeof next !== "string" || !next) return
 

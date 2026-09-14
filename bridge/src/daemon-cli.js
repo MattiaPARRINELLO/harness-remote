@@ -26,6 +26,7 @@ function parsePort(value, option) {
 
 export function parseDaemonOptions(args, environment = process.env, detect = resolveLaunchPlan) {
   const bridgeArgs = []
+  let openCodeCommandExplicit = Boolean(environment.HARNESS_REMOTE_OPENCODE_COMMAND)
   const options = {
     openCode: true,
     openCodeCommand: resolveOpenCodeCommand(environment),
@@ -49,6 +50,7 @@ export function parseDaemonOptions(args, environment = process.env, detect = res
     }
     if (option === "--opencode-command") {
       options.openCodeCommand = requireValue(args, index, option)
+      openCodeCommandExplicit = true
       index += 1
       continue
     }
@@ -78,7 +80,7 @@ export function parseDaemonOptions(args, environment = process.env, detect = res
   const named = bridgeArgs.includes("--backend") || environment.HARNESS_REMOTE_BACKEND || environment.OMP_BRIDGE_BACKEND
   if (!named) bridgeArgs.push("--backend", detect(args).backend)
 
-  return { config: parseConfig(bridgeArgs, environment), ...options }
+  return { config: parseConfig(bridgeArgs, environment), ...options, openCodeCommandExplicit }
 }
 
 export function daemonUsage() {
@@ -105,7 +107,7 @@ async function main() {
     return
   }
 
-  const { config, openCode, openCodeCommand: defaultOpenCodeCommand, openCodeHost, openCodePort, openCodeTimeout } = parsed
+  const { config, openCode, openCodeCommand: configuredOpenCodeCommand, openCodeCommandExplicit, openCodeHost, openCodePort, openCodeTimeout } = parsed
   if (config.help) {
     process.stdout.write(`${daemonUsage()}\n`)
     return
@@ -176,7 +178,7 @@ async function main() {
   if (openCode) {
     const managedBackend = ["opencode", "mimocode"].find((backend) => plan.detected.includes(backend)) ?? "opencode"
     const managedLabel = managedBackend === "mimocode" ? "Mimocode" : "OpenCode"
-    const openCodeCommand = resolveOpenCodeCommand(process.env, { backend: managedBackend })
+    const openCodeCommand = openCodeCommandExplicit ? configuredOpenCodeCommand : resolveOpenCodeCommand(process.env, { backend: managedBackend })
     const managedOpenCode = new ManagedOpenCodeHost({
       command: openCodeCommand,
       host: openCodeHost,
